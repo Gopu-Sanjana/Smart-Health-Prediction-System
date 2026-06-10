@@ -183,4 +183,3 @@ Through this project, I gained practical experience in:
 
 Sanjana Gopu
 
-B.Tech – Computer Science and Information Technology
