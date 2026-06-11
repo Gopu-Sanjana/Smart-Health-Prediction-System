@@ -1,20 +1,17 @@
-import os
 import google.generativeai as genai
 
+# Paste your Gemini API key here temporarily
+API_KEY = "your api_key"
 
-API_KEY = os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=API_KEY)
 
-if API_KEY:
-    genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel("gemini-2.5-flash")
-else:
-    model = None
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 
 def generate_ai_remark(glucose, haemoglobin, cholesterol):
 
     prompt = f"""
-    Analyze the following patient values:
+    Analyze the following patient health values:
 
     Glucose: {glucose}
     Haemoglobin: {haemoglobin}
@@ -23,35 +20,63 @@ def generate_ai_remark(glucose, haemoglobin, cholesterol):
     Give a short health assessment and recommendations.
     """
 
-    # Try Gemini first
-    if model:
-        try:
-            response = model.generate_content(prompt)
-            return response.text
-        except Exception:
-            pass
+    try:
 
-    # Fallback logic
+        response = model.generate_content(prompt)
+
+        if response and response.text:
+            return response.text
+
+    except Exception as e:
+
+        print("AI ERROR:", e)
+
+    # Fallback mechanism
+
     remarks = []
 
-    if glucose > 140:
+    if glucose > 180:
         remarks.append(
-            "High glucose level detected. Possible diabetes risk."
+            "Very high glucose levels detected. Immediate medical consultation is recommended."
+        )
+
+    elif glucose > 140:
+        remarks.append(
+            "High glucose levels detected. Possible diabetes risk."
+        )
+
+    else:
+        remarks.append(
+            "Glucose levels appear to be within the normal range."
         )
 
     if haemoglobin < 12:
         remarks.append(
-            "Low haemoglobin level detected. Possible anemia."
+            "Low haemoglobin levels detected. Possible anemia risk."
         )
 
-    if cholesterol > 200:
+    else:
         remarks.append(
-            "High cholesterol level detected. Increased cardiovascular risk."
+            "Haemoglobin levels appear normal."
         )
 
-    if not remarks:
+    if cholesterol > 240:
         remarks.append(
-            "All entered health parameters are within the normal range."
+            "Very high cholesterol levels detected. Increased cardiovascular risk."
         )
+
+    elif cholesterol > 200:
+        remarks.append(
+            "High cholesterol levels detected. Lifestyle modifications may be required."
+        )
+
+    else:
+        remarks.append(
+            "Cholesterol levels appear normal."
+        )
+
+    remarks.append(
+        "Please consult a healthcare professional for proper diagnosis."
+    )
 
     return " ".join(remarks)
