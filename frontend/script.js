@@ -6,9 +6,40 @@ document
     .getElementById("patientForm")
     .addEventListener("submit", createPatient);
 
+function formatDate(dateString) {
+
+    const date = new Date(dateString);
+
+    const day =
+    String(date.getDate()).padStart(2, "0");
+
+    const month =
+    String(date.getMonth() + 1).padStart(2, "0");
+
+    const year =
+    date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+}
+
 async function createPatient(event) {
 
     event.preventDefault();
+
+    const dobInput =
+    document.getElementById("dob").value;
+
+    const parts =
+    dobInput.split("/");
+
+    if (parts.length !== 3) {
+
+        alert("Please enter date in DD/MM/YYYY format");
+        return;
+    }
+
+    const formattedDob =
+    `${parts[2]}-${parts[1]}-${parts[0]}`;
 
     const patientData = {
 
@@ -16,7 +47,7 @@ async function createPatient(event) {
         document.getElementById("full_name").value,
 
         date_of_birth:
-        document.getElementById("dob").value,
+        formattedDob,
 
         email:
         document.getElementById("email").value,
@@ -31,9 +62,7 @@ async function createPatient(event) {
         Number(document.getElementById("cholesterol").value)
     };
 
-    // Validation
-
-    if (new Date(patientData.date_of_birth) > new Date()) {
+    if (new Date(formattedDob) > new Date()) {
 
         alert("Date of Birth cannot be in the future");
         return;
@@ -111,7 +140,7 @@ async function createPatient(event) {
 
         document.getElementById("result").innerHTML = `
             <div class="alert alert-danger">
-                Failed to connect to API or Email already exists
+                Failed to connect to API
             </div>
         `;
 
@@ -140,7 +169,15 @@ async function loadPatients() {
 
                 <td>${patient.full_name}</td>
 
+                <td>${formatDate(patient.date_of_birth)}</td>
+
                 <td>${patient.email}</td>
+
+                <td>${patient.glucose}</td>
+
+                <td>${patient.haemoglobin}</td>
+
+                <td>${patient.cholesterol}</td>
 
                 <td>${patient.remarks}</td>
 
@@ -164,7 +201,9 @@ async function loadPatients() {
             `;
         });
 
-        document.getElementById("patientTable").innerHTML = rows;
+        document.getElementById(
+            "patientTable"
+        ).innerHTML = rows;
 
     }
     catch (error) {
@@ -209,7 +248,7 @@ async function editPatient(id) {
     patient.email;
 
     document.getElementById("dob").value =
-    patient.date_of_birth;
+    formatDate(patient.date_of_birth);
 
     document.getElementById("glucose").value =
     patient.glucose;
